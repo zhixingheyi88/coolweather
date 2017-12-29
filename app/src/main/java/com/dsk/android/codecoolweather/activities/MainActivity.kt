@@ -1,7 +1,8 @@
-package com.dsk.android.codecoolweather
+package com.dsk.android.codecoolweather.activities
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import com.dsk.android.codecoolweather.R
 
 class MainActivity : AppCompatActivity() {
 
