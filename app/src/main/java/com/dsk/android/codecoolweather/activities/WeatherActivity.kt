@@ -1,5 +1,6 @@
 package com.dsk.android.codecoolweather.activities
 
+import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Build
@@ -15,6 +16,7 @@ import android.widget.*
 import com.bumptech.glide.Glide
 import com.dsk.android.codecoolweather.R
 import com.dsk.android.codecoolweather.gson.Weather
+import com.dsk.android.codecoolweather.service.AutoUpdateService
 import com.dsk.android.codecoolweather.util.HttpUtil
 import com.dsk.android.codecoolweather.util.Utility
 import okhttp3.Call
@@ -139,8 +141,11 @@ class WeatherActivity : AppCompatActivity() {
      * 处理并展示Weather实体类中的数据
      * */
     private fun showWeatherInfo(weather:Weather){
+        if (weather !=null && "ok".equals(weather.status)){
+
+
         var cityName:String?=weather.basic!!.cityName;
-       var updateTime:String?=weather.basic!!.update!!.updateTime!!.split(" ")[1];
+        var updateTime:String?=weather.basic!!.update!!.updateTime!!.split(" ")[1];
         var degree:String?=weather.now!!.temperature+" ℃";
         var weatherInfo:String?=weather.now!!.more!!.info;
 
@@ -173,6 +178,12 @@ class WeatherActivity : AppCompatActivity() {
         carWashText!!.setText(carwash)
         sportText!!.setText(sport)
         weatherLayout!!.visibility=View.VISIBLE
+            //启动服务
+        var intent=Intent(this,AutoUpdateService::class.java)
+         startService(intent)
+        }else{
+            Toast.makeText(this,"获取天气信息失败",Toast.LENGTH_SHORT)
+        }
     }
 
     private fun loadBingPic(){
