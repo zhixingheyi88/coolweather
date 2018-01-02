@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import com.dsk.android.codecoolweather.R
+import com.dsk.android.codecoolweather.activities.MainActivity
 import com.dsk.android.codecoolweather.activities.WeatherActivity
 import com.dsk.android.codecoolweather.db.City
 import com.dsk.android.codecoolweather.db.County
@@ -67,10 +68,17 @@ class ChooseAreaFragment: Fragment() {
                  queryCounties();
               }else if (currentLevel == LEVEL_COUNTY){
                   var weatherId:String=countyList!!.get(position).weatherId!!
+                  if (activity is MainActivity){
                   var intent=Intent(activity,WeatherActivity::class.java)
                   intent.putExtra("weather_id",weatherId)
                   startActivity(intent)
                   activity!!.finish();
+                  }else if(activity is WeatherActivity){
+                  var activity:WeatherActivity=activity as WeatherActivity
+                      activity.drawerLayout!!.closeDrawers()
+                      activity.swipeRefresh!!.isRefreshing=true
+                      activity.requestWeather(weatherId)
+                  }
               }
             }
         })

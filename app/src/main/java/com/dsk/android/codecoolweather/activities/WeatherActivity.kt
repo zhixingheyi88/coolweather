@@ -6,6 +6,9 @@ import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.preference.PreferenceManager
+import android.support.v4.view.GravityCompat
+import android.support.v4.widget.DrawerLayout
+import android.support.v4.widget.SwipeRefreshLayout
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
@@ -33,7 +36,9 @@ class WeatherActivity : AppCompatActivity() {
     private var carWashText:TextView?=null;
     private var sportText:TextView?=null;
     private var bingPicImg:ImageView?=null;
-
+    var swipeRefresh:SwipeRefreshLayout?=null;
+    var drawerLayout:DrawerLayout?=null;
+    private var navButton:Button?=null;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,7 +63,16 @@ class WeatherActivity : AppCompatActivity() {
         carWashText=findViewById(R.id.car_wash_text)
         sportText=findViewById(R.id.sport_text)
         bingPicImg=findViewById(R.id.bing_pic_img)
+        swipeRefresh=findViewById(R.id.swipe_refresh)
+        swipeRefresh!!.setColorSchemeResources(R.color.colorPrimary)
+        drawerLayout=findViewById(R.id.drawer_layout)
+        navButton=findViewById(R.id.nav_button)
 
+        navButton!!.setOnClickListener(object :View.OnClickListener{
+            override fun onClick(p0: View?) {
+                drawerLayout!!.openDrawer(GravityCompat.START)
+            }
+        })
 
         var prefs:SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -69,14 +83,21 @@ class WeatherActivity : AppCompatActivity() {
             loadBingPic();
         }
         var weatherString:String?=prefs.getString("weather",null);
+        var weatherId:String?=null;
         if(weatherString !=null){
             var weather:Weather=Utility.handleWeatherResponse(weatherString)!!;
+            weatherId=weather.basic!!.weatherId
             showWeatherInfo(weather)
         }else{
-            var weatherId:String=intent.getStringExtra("weather_id");
+            weatherId=intent.getStringExtra("weather_id");
             weatherLayout!!.visibility=View.INVISIBLE
             requestWeather(weatherId)
         }
+        swipeRefresh!!.setOnRefreshListener(object :SwipeRefreshLayout.OnRefreshListener{
+            override fun onRefresh() {
+                requestWeather(weatherId!!)
+            }
+        })
     }
     /*
     * 根据天气id请求城市天气信息
@@ -97,6 +118,7 @@ class WeatherActivity : AppCompatActivity() {
                         }else{
                             Toast.makeText(this@WeatherActivity,"获取天气信息失败",Toast.LENGTH_SHORT).show();
                         }
+                        swipeRefresh!!.isRefreshing=false
                     }
                 })
             }
@@ -106,6 +128,7 @@ class WeatherActivity : AppCompatActivity() {
                 runOnUiThread(object :Runnable{
                     override fun run() {
                         Toast.makeText(this@WeatherActivity,"获取天气信息失败",Toast.LENGTH_SHORT).show();
+                        swipeRefresh!!.isRefreshing=false
                     }
                 })
             }
